@@ -1,0 +1,9 @@
+requests
+rich
+prompt_toolkit
+openai
+pyyaml
+click
+python-dotenv
+pathlib
+datetime
