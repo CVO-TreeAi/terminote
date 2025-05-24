@@ -163,6 +163,20 @@ terminote/
 └── requirements.txt    # Dependencies
 ```
 
+## 🚀 For Repository Owners
+
+To create your own public repository:
+
+1. Create a new repository on GitHub (public)
+2. Add the remote origin:
+   ```bash
+   git remote add origin https://github.com/yourusername/terminote.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+3. Update the clone URL in README.md to match your repository
+
 ## 🤝 Contributing
 
 1. Fork the repository
