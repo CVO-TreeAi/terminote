@@ -18,7 +18,7 @@ An AI-native CLI for focused writing, dev planning, and document generation powe
 ### 1. Clone and Install
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/terminote.git
+git clone https://github.com/CVO-TREEAI/terminote.git
 cd terminote
 
 # Install NEO command globally (creates virtual environment + dependencies)
@@ -170,7 +170,7 @@ To create your own public repository:
 1. Create a new repository on GitHub (public)
 2. Add the remote origin:
    ```bash
-   git remote add origin https://github.com/yourusername/terminote.git
+   git remote add origin https://github.com/CVO-TREEAI/terminote.git
    git branch -M main
    git push -u origin main
    ```
