@@ -41,7 +41,8 @@ class Router:
             f"[bold green]✍️  Writing Session: {session_name}[/bold green]\n\n"
             f"Words: {session.get('word_count', 0)} | "
             f"Last modified: {session.get('last_modified', 'Never')}\n\n"
-            "[dim]Commands: /help, /save, /continue, /suggest, /quit[/dim]",
+            "[dim]Commands: /help, /save, /continue, /suggest, /chat, /quit[/dim]\n"
+            "[yellow]Press Tab or /chat to toggle AI chat mode[/yellow]",
             title="Writing Mode"
         ))
         
@@ -57,6 +58,11 @@ class Router:
                     multiline=True,
                     wrap_lines=True
                 )
+                
+                # Check for Tab key to toggle chat mode
+                if user_input.strip() == "\t" or user_input.strip().startswith("/chat"):
+                    self._toggle_chat_mode(session, session_name)
+                    continue
                 
                 if not user_input.strip():
                     continue
@@ -108,6 +114,9 @@ class Router:
             
         elif cmd == 'suggest':
             self._get_writing_suggestions(session)
+        
+        elif cmd == 'chat':
+            self._toggle_chat_mode(session, session_name)
             
         elif cmd == 'outline':
             topic = ' '.join(cmd_parts[1:]) if len(cmd_parts) > 1 else None
@@ -142,6 +151,7 @@ class Router:
 
 [cyan]/help[/cyan]              - Show this help
 [cyan]/save[/cyan]              - Save current session
+[cyan]/chat[/cyan]              - Toggle AI chat mode (quick Q&A)
 [cyan]/continue[/cyan] [direction] - AI continues your writing
 [cyan]/suggest[/cyan]           - Get AI suggestions for improvement
 [cyan]/outline[/cyan] [topic]   - Generate an outline
@@ -150,8 +160,109 @@ class Router:
 [cyan]/quit[/cyan]              - Exit writing mode
 
 [dim]Tip: Just start typing to add content to your document![/dim]
+[yellow]Quick toggle: Press Tab or /chat to switch to AI chat mode[/yellow]
         """
         console.print(Panel(help_text, title="Help"))
+    
+    def _toggle_chat_mode(self, session: dict, session_name: str):
+        """Toggle into AI chat mode while keeping document context."""
+        console.print(Panel(
+            f"[bold cyan]💬 AI Chat Mode[/bold cyan]\n\n"
+            f"Document: {session_name} ({session.get('word_count', 0)} words)\n\n"
+            "[dim]Chat with NEO about your document. Type '/back' to return to writing.[/dim]\n"
+            "[yellow]NEO has full context of your current document[/yellow]",
+            title="Chat Mode"
+        ))
+        
+        document_context = f"Current document '{session_name}':\n{session.get('content', 'No content yet.')}"
+        
+        while True:
+            try:
+                chat_input = self.prompt_session.prompt("💬 Ask NEO > ")
+                
+                if not chat_input.strip():
+                    continue
+                    
+                # Exit chat mode
+                if chat_input.strip().lower() in ['/back', '/write', '/exit', '/return']:
+                    console.print("[green]🔙 Returning to writing mode...[/green]")
+                    break
+                
+                # Special chat commands
+                if chat_input.startswith('/'):
+                    if self._handle_chat_command(chat_input, session, session_name):
+                        break
+                    continue
+                
+                # Send query to AI with document context
+                console.print("[cyan]🤖 NEO is thinking...[/cyan]")
+                
+                messages = [
+                    {
+                        "role": "system",
+                        "content": f"""You are NEO, an AI writing assistant. The user is working on a document and has switched to chat mode to ask you questions or get help. 
+
+DOCUMENT CONTEXT:
+{document_context}
+
+Provide helpful, concise responses about their writing, offer suggestions, answer questions, or help them brainstorm. Keep responses focused and actionable."""
+                    },
+                    {
+                        "role": "user",
+                        "content": chat_input
+                    }
+                ]
+                
+                response_text = ""
+                with Live(console=console, refresh_per_second=4) as live:
+                    for chunk in self.ai_client.chat_completion(messages, task='writing'):
+                        response_text += chunk
+                        live.update(Panel(
+                            Markdown(response_text),
+                            title="💬 NEO Response"
+                        ))
+                
+                console.print("")  # Add spacing
+                
+            except KeyboardInterrupt:
+                console.print("\n[green]🔙 Returning to writing mode...[/green]")
+                break
+            except EOFError:
+                break
+    
+    def _handle_chat_command(self, command: str, session: dict, session_name: str) -> bool:
+        """Handle chat mode commands. Returns True if should exit chat."""
+        cmd_parts = command[1:].split()
+        cmd = cmd_parts[0].lower()
+        
+        if cmd == 'help':
+            self._show_chat_help()
+        elif cmd == 'continue':
+            direction = ' '.join(cmd_parts[1:]) if len(cmd_parts) > 1 else ""
+            self._continue_writing(session, direction)
+        elif cmd == 'suggest':
+            self._get_writing_suggestions(session)
+        elif cmd == 'back' or cmd == 'write' or cmd == 'return':
+            return True
+        else:
+            console.print(f"[red]Unknown chat command: {cmd}[/red]")
+            self._show_chat_help()
+        
+        return False
+    
+    def _show_chat_help(self):
+        """Show chat mode help."""
+        help_text = """
+[bold]Chat Mode Commands:[/bold]
+
+[cyan]/back[/cyan]              - Return to writing mode
+[cyan]/continue[/cyan] [direction] - AI continues your writing
+[cyan]/suggest[/cyan]           - Get AI suggestions for improvement
+[cyan]/help[/cyan]              - Show this help
+
+[dim]Just type naturally to chat with NEO about your document![/dim]
+        """
+        console.print(Panel(help_text, title="Chat Help"))
     
     def _continue_writing(self, session: dict, direction: str = ""):
         """Use AI to continue writing."""
