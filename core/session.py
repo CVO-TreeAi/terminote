@@ -11,6 +11,7 @@ from typing import Dict, List, Optional
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+from .error_handler import SessionError, error_handler, safe_execute
 
 console = Console()
 
@@ -75,8 +76,13 @@ class SessionManager:
             return session_data
             
         except (json.JSONDecodeError, FileNotFoundError) as e:
-            console.print(f"[red]Error loading session '{name}': {e}[/red]")
-            console.print("[yellow]Creating new session instead.[/yellow]")
+            # Use centralized error handling
+            session_error = SessionError(f"Error loading session '{name}': {str(e)}")
+            error_handler.handle_error(
+                session_error,
+                context="Session Loading",
+                user_message=f"Could not load session '{name}'. Creating a new session instead."
+            )
             return self._create_empty_session(name)
     
     def save_session(self, name: str, session_data: Dict) -> bool:

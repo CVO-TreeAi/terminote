@@ -195,6 +195,9 @@ case "${1:-}" in
     "setup")
         exec_terminote "setup" "${@:2}"
         ;;
+    "doctor" | "health" | "check")
+        exec_terminote "doctor" "${@:2}"
+        ;;
     "--help" | "-h" | "help")
         show_banner
         echo "NEO Commands:"

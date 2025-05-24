@@ -11,6 +11,7 @@ from rich.spinner import Spinner
 import time
 
 from .config_manager import ConfigManager
+from .error_handler import APIError, error_handler, safe_execute
 
 console = Console()
 
@@ -73,8 +74,14 @@ class OpenRouterClient:
                 return response.choices[0].message.content
                 
         except Exception as e:
+            # Use centralized error handling
+            api_error = APIError(f"Error calling {model}: {str(e)}")
+            error_handler.handle_error(
+                api_error, 
+                context="AI Chat Completion",
+                user_message=f"Failed to get response from AI model {model}"
+            )
             error_msg = f"❌ Error calling {model}: {str(e)}"
-            console.print(f"[red]{error_msg}[/red]")
             if stream:
                 yield error_msg
             else:
@@ -242,5 +249,11 @@ class OpenRouterClient:
             )
             return True
         except Exception as e:
-            console.print(f"[red]Connection test failed: {e}[/red]")
+            # Use centralized error handling
+            api_error = APIError(f"Connection test failed: {str(e)}")
+            error_handler.handle_error(
+                api_error, 
+                context="API Connection Test",
+                user_message="Failed to connect to OpenRouter API. Check your internet connection and API key."
+            )
             return False 

@@ -18,6 +18,7 @@ sys.path.insert(0, str(project_root))
 from core.router import Router
 from core.session import SessionManager
 from core.prompt_engine import PromptEngine
+from core.health_check import run_health_check
 from tools.docbuilder import DocBuilder
 from tools.file_editor import FileEditor
 
@@ -93,6 +94,19 @@ def config():
     from core.config_manager import ConfigManager
     config = ConfigManager()
     config.show_config()
+
+@cli.command()
+def doctor():
+    """Run system health check and diagnostics."""
+    console.print(Panel(
+        Text("🩺 Health Check", style="bold cyan"),
+        subtitle="System diagnostics and troubleshooting"
+    ))
+    
+    success = run_health_check()
+    if not success:
+        console.print("\n[yellow]Some issues detected. Run 'neo setup' if needed.[/yellow]")
+        sys.exit(1)
 
 if __name__ == '__main__':
     cli() 

@@ -12,6 +12,7 @@ from rich.prompt import Prompt, Confirm
 from rich.table import Table
 from rich.panel import Panel
 from dotenv import load_dotenv, set_key
+from .error_handler import ConfigurationError, error_handler
 
 console = Console()
 
