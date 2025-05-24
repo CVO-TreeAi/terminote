@@ -24,6 +24,14 @@ fi
 
 echo "🚀 Installing NEO (TermiNote v5) globally to $INSTALL_DIR..."
 
+# Debug info for Termux
+if [ -n "$TERMUX_VERSION" ]; then
+    echo "📱 Termux environment details:"
+    echo "   PREFIX: $PREFIX"
+    echo "   HOME: $HOME"
+    echo "   PATH: $PATH"
+fi
+
 # Check if virtual environment exists, create if not
 if [ ! -d "$TERMINOTE_DIR/venv" ]; then
     echo "📦 Setting up virtual environment..."
@@ -55,8 +63,20 @@ else
 fi
 
 # Create the neo command script
-rm -f /tmp/neo /tmp/neo_final  # Clean up any existing files first
-cat > /tmp/neo << 'EOF'
+# Use a safe temp directory that works on all platforms including Termux
+if [ -n "$TERMUX_VERSION" ]; then
+    # Termux uses a different temp structure
+    TEMP_DIR="$HOME/.cache"
+    mkdir -p "$TEMP_DIR"
+else
+    TEMP_DIR="/tmp"
+fi
+
+NEO_TEMP="$TEMP_DIR/neo_$$"
+NEO_FINAL="$TEMP_DIR/neo_final_$$"
+
+rm -f "$NEO_TEMP" "$NEO_FINAL"  # Clean up any existing files first
+cat > "$NEO_TEMP" << 'EOF'
 #!/bin/bash
 # NEO - TermiNote v5 Quick Access Command
 
@@ -204,30 +224,30 @@ esac
 EOF
 
 # Replace placeholder with actual directory and ensure permissions
-sed "s|TERMINOTE_DIR_PLACEHOLDER|$TERMINOTE_DIR|g" /tmp/neo > /tmp/neo_final
-chmod +x /tmp/neo_final
+sed "s|TERMINOTE_DIR_PLACEHOLDER|$TERMINOTE_DIR|g" "$NEO_TEMP" > "$NEO_FINAL"
+chmod +x "$NEO_FINAL"
 
 # Install the command
 if [ -n "$TERMUX_VERSION" ]; then
     # Termux - no sudo needed, direct install to $PREFIX/bin
-    cp /tmp/neo_final "$INSTALL_DIR/neo"
+    cp "$NEO_FINAL" "$INSTALL_DIR/neo"
     chmod +x "$INSTALL_DIR/neo"
     echo "✅ NEO installed globally to $INSTALL_DIR/neo"
 elif [ "$EUID" -eq 0 ]; then
     # Running as root
-    cp /tmp/neo_final "$INSTALL_DIR/neo"
+    cp "$NEO_FINAL" "$INSTALL_DIR/neo"
     chmod +x "$INSTALL_DIR/neo"
     echo "✅ NEO installed globally to $INSTALL_DIR/neo"
 else
     # Try with sudo (macOS/Linux)
     echo "📋 Installing to $INSTALL_DIR requires admin privileges..."
-    sudo cp /tmp/neo_final "$INSTALL_DIR/neo"
+    sudo cp "$NEO_FINAL" "$INSTALL_DIR/neo"
     sudo chmod +x "$INSTALL_DIR/neo"
     echo "✅ NEO installed globally to $INSTALL_DIR/neo"
 fi
 
 # Clean up
-rm -f /tmp/neo /tmp/neo_final
+rm -f "$NEO_TEMP" "$NEO_FINAL"
 
 echo ""
 echo "🎉 Installation complete!"

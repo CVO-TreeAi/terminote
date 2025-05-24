@@ -36,8 +36,12 @@ pkg update && pkg install python git
 git clone https://github.com/CVO-TreeAi/terminote.git
 cd terminote
 
-# Install NEO command globally (no sudo needed on Termux)
-./install.sh
+# Use the Termux-specific installer (recommended)
+chmod +x install-termux.sh
+./install-termux.sh
+
+# Or use the universal installer
+# ./install.sh
 ```
 
 ### 2. Configure Your API Key
