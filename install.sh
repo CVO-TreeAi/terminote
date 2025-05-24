@@ -1,18 +1,48 @@
 #!/bin/bash
 # TermiNote v5 Global Installation Script
 # Creates a global 'neo' command for quick access to TermiNote
+# Supports macOS, Linux, and Android (Termux)
 
 set -e
 
 TERMINOTE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="/usr/local/bin"
 
-echo "🚀 Installing NEO (TermiNote v5) globally..."
+# Detect environment and set appropriate install directory
+if [ -n "$TERMUX_VERSION" ]; then
+    # Termux (Android)
+    INSTALL_DIR="$PREFIX/bin"
+    echo "🤖 Detected Termux (Android) - Installing for Termux environment"
+elif [ "$(uname)" = "Darwin" ]; then
+    # macOS
+    INSTALL_DIR="/usr/local/bin"
+    echo "🍎 Detected macOS - Installing with sudo privileges"
+else
+    # Linux
+    INSTALL_DIR="/usr/local/bin"
+    echo "🐧 Detected Linux - Installing with sudo privileges"
+fi
+
+echo "🚀 Installing NEO (TermiNote v5) globally to $INSTALL_DIR..."
 
 # Check if virtual environment exists, create if not
 if [ ! -d "$TERMINOTE_DIR/venv" ]; then
     echo "📦 Setting up virtual environment..."
-    python3 -m venv "$TERMINOTE_DIR/venv"
+    
+    # Check if python3 is available, fallback to python
+    if command -v python3 >/dev/null 2>&1; then
+        PYTHON_CMD="python3"
+    elif command -v python >/dev/null 2>&1; then
+        PYTHON_CMD="python"
+    else
+        echo "❌ Python not found. Please install Python first."
+        if [ -n "$TERMUX_VERSION" ]; then
+            echo "   Run: pkg install python"
+        fi
+        exit 1
+    fi
+    
+    echo "   Using: $PYTHON_CMD"
+    $PYTHON_CMD -m venv "$TERMINOTE_DIR/venv"
     source "$TERMINOTE_DIR/venv/bin/activate"
     
     echo "📥 Installing dependencies..."
@@ -61,7 +91,8 @@ quick_work() {
             cd "$TERMINOTE_DIR"
             if [ -f venv/bin/activate ]; then
                 source venv/bin/activate
-                recent_session=$(python3 -c "
+                # Use python from venv (works on all platforms)
+                recent_session=$(python -c "
 import json, os, glob
 from pathlib import Path
 sessions_dir = Path.home() / '.terminote' / 'sessions'
@@ -104,15 +135,15 @@ exec_terminote() {
     # Check if setup is needed
     if [ ! -f ~/.terminote/config.yaml ] && [ "$1" != "setup" ]; then
         echo "🔧 First time setup required..."
-        python3 cli.py setup
+        python cli.py setup
         echo ""
     fi
     
     if [ -z "$1" ]; then
         # Interactive mode
-        python3 cli.py
+        python cli.py
     else
-        python3 cli.py "$@"
+        python cli.py "$@"
     fi
 }
 
@@ -177,13 +208,18 @@ sed "s|TERMINOTE_DIR_PLACEHOLDER|$TERMINOTE_DIR|g" /tmp/neo > /tmp/neo_final
 chmod +x /tmp/neo_final
 
 # Install the command
-if [ "$EUID" -eq 0 ]; then
+if [ -n "$TERMUX_VERSION" ]; then
+    # Termux - no sudo needed, direct install to $PREFIX/bin
+    cp /tmp/neo_final "$INSTALL_DIR/neo"
+    chmod +x "$INSTALL_DIR/neo"
+    echo "✅ NEO installed globally to $INSTALL_DIR/neo"
+elif [ "$EUID" -eq 0 ]; then
     # Running as root
     cp /tmp/neo_final "$INSTALL_DIR/neo"
     chmod +x "$INSTALL_DIR/neo"
     echo "✅ NEO installed globally to $INSTALL_DIR/neo"
 else
-    # Try with sudo
+    # Try with sudo (macOS/Linux)
     echo "📋 Installing to $INSTALL_DIR requires admin privileges..."
     sudo cp /tmp/neo_final "$INSTALL_DIR/neo"
     sudo chmod +x "$INSTALL_DIR/neo"

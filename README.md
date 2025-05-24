@@ -16,12 +16,27 @@ An AI-native CLI for focused writing, dev planning, and document generation powe
 ## 🚀 Quick Start
 
 ### 1. Clone and Install
+
+**On macOS/Linux:**
 ```bash
 # Clone the repository
-git clone https://github.com/CVO-TREEAI/terminote.git
+git clone https://github.com/CVO-TreeAi/terminote.git
 cd terminote
 
 # Install NEO command globally (creates virtual environment + dependencies)
+./install.sh
+```
+
+**On Android (Termux):**
+```bash
+# First, install required packages
+pkg update && pkg install python git
+
+# Clone the repository
+git clone https://github.com/CVO-TreeAi/terminote.git
+cd terminote
+
+# Install NEO command globally (no sudo needed on Termux)
 ./install.sh
 ```
 
@@ -140,7 +155,19 @@ export EDITOR="code"  # Default editor for file editing
 TermiNote uses its own virtual environment. To manually activate:
 ```bash
 source venv/bin/activate
-python3 cli.py --help
+python cli.py --help  # Use 'python' inside venv (works on all platforms)
+```
+
+### Termux (Android) Support
+TermiNote fully supports Android via Termux:
+- **Automatic detection** of Termux environment
+- **No sudo required** - installs to `$PREFIX/bin`
+- **Python compatibility** - works with Termux's Python installation
+- **Full feature support** - all NEO features available on mobile
+
+**Termux requirements:**
+```bash
+pkg install python git
 ```
 
 ## 📁 Project Structure
