@@ -25,6 +25,7 @@ else
 fi
 
 # Create the neo command script
+rm -f /tmp/neo /tmp/neo_final  # Clean up any existing files first
 cat > /tmp/neo << 'EOF'
 #!/bin/bash
 # NEO - TermiNote v5 Quick Access Command
@@ -171,8 +172,9 @@ case "${1:-}" in
 esac
 EOF
 
-# Replace placeholder with actual directory
+# Replace placeholder with actual directory and ensure permissions
 sed "s|TERMINOTE_DIR_PLACEHOLDER|$TERMINOTE_DIR|g" /tmp/neo > /tmp/neo_final
+chmod +x /tmp/neo_final
 
 # Install the command
 if [ "$EUID" -eq 0 ]; then
