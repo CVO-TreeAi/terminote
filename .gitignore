@@ -78,4 +78,7 @@ Thumbs.db
 # Backup files
 *.bak
 *.backup
-*.orig 
+*.orig
+
+# Deployment scripts (local helper)
+deploy-to-github.sh 
