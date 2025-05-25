@@ -12,6 +12,9 @@ An AI-native CLI for focused writing, dev planning, and document generation powe
 - **💾 Session Management** - Auto-save, resume, and export your work
 - **🔧 Multi-Model Support** - Use Claude, GPT-4, Llama, and other models via OpenRouter
 - **🎨 Beautiful Terminal UI** - Rich formatting with syntax highlighting
+- **📱 Native Android App** - Touch-optimized GUI with dual-mode support (GUI + Terminal)
+- **🤖 Dual-Mode Operation** - Seamlessly switch between GUI and CLI interfaces
+- **🔄 Cross-Platform Sync** - Same core experience across desktop, mobile, and tablet
 
 ## 🚀 Quick Start
 
@@ -42,6 +45,19 @@ chmod +x install-termux.sh
 
 # Or use the universal installer
 # ./install.sh
+```
+
+**📱 Android App (Native GUI):**
+```bash
+# Option 1: Download latest APK from releases
+wget https://github.com/CVO-TreeAi/terminote/releases/latest/download/terminote-release.apk
+adb install terminote-release.apk
+
+# Option 2: Build from source
+cd terminote/android
+./install-android-dev.sh  # Setup development environment
+./build-android.sh debug  # Build APK
+adb install bin/terminote-*-debug.apk
 ```
 
 ### 2. Configure Your API Key
@@ -106,12 +122,38 @@ neo generate <type> [output-path]
 ```bash
 neo sessions     # List all sessions
 neo config       # View configuration
+neo doctor       # System health check and diagnostics
 
 # Quick shortcuts
 neo s           # Sessions
 neo c           # Config
 neo w           # Quick work menu
 ```
+
+### 📱 Android App Usage
+
+**Dual-Mode Launcher:**
+```bash
+# Auto-detect best interface for environment
+python android/launcher.py
+
+# Force specific mode
+python android/launcher.py gui      # GUI app
+python android/launcher.py cli      # Terminal CLI
+```
+
+**GUI App Features:**
+- **Touch-optimized interface** with large buttons and scroll areas
+- **Session browser** with visual session management
+- **Chat mode toggle** - switch between writing and AI chat
+- **Export to Downloads** folder with Android sharing integration
+- **Auto-save** and session recovery
+
+**Termux Integration:**
+- **Full CLI compatibility** in Termux terminal
+- **GUI option** when X11 or VNC is available
+- **Shared session storage** between GUI and CLI modes
+- **Environment detection** - automatically chooses best interface
 
 ## ⚙️ Configuration
 
