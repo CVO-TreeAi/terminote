@@ -36,7 +36,7 @@ version = 5.0.0
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,kivymd,requests,openai,pyyaml,rich,prompt_toolkit,python-dotenv,click,markdown-it-py,tqdm
+requirements = python3,kivy,requests,pyyaml
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -252,12 +252,6 @@ android.accept_sdk_license = True
 # (list) Android library project to add (will be added in the
 # project.properties automatically.)
 #android.library_references = @jar/foo.jar:@jar/bar.jar
-
-# (bool) Indicate if the application should be fullscreen or not
-fullscreen = 0
-
-# (str) Supported orientation (one of landscape, sensorLandscape, portrait, sensorPortrait or all)
-orientation = portrait
 
 # (bool) Indicate if you would like to launch the main.py as a service
 # Only usable with api level >= API 14.

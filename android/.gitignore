@@ -1,0 +1,25 @@
+# Buildozer files
+.buildozer/
+bin/
+build/
+
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Android
+*.apk
+*.aab
+*.keystore
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
